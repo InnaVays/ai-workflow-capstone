@@ -32,20 +32,20 @@ To train the model, send a POST request to the /train endpoint with the appropri
 ### Make a Prediction
 To make a prediction, send a POST request to the /predict endpoint with the required parameters.
 
+## Batch Prediction and EDA
+Run batch_prediction_and_eda.ipynb in Jupyter Notebook and run all cells. 
+
+## Create report
+
+```sh
+jupyter nbconvert batch_prediction_and_eda.ipynb --to slides --no-input --post serve
+```
+
 ## Running Unit Tests
 To run the unit tests, use the following command:
 
 ```sh
 python run_tests.py
-```
-
-### Batch Prediction and EDA
-Run batch_prediction_and_eda.ipynb in Jupyter Notebook and run all cells. 
-
-### Create report
-
-```sh
-jupyter nbconvert batch_prediction_and_eda.ipynb --to slides --no-input --post serve
 ```
 
 
