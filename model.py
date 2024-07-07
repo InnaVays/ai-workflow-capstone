@@ -93,7 +93,7 @@ def _model_train(df, tag, test=False):
         saved_model = os.path.join(MODEL_DIR, "test-{}-{}.joblib".format(tag, model_name))
         print("... saving test version of model: {}".format(saved_model))
     else:
-        saved_model = os.path.join(MODEL_DIR, "sl-{}-{}.joblib".format(tag, model_name))
+        saved_model = os.path.join(MODEL_DIR, "test-{}-{}.joblib".format(tag, model_name))
         print("... saving model: {}".format(saved_model))
         
     joblib.dump(grid, saved_model)
