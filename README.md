@@ -35,12 +35,16 @@ To make a prediction, send a POST request to the /predict endpoint with the requ
 ## Running Unit Tests
 To run the unit tests, use the following command:
 
+```sh
 pytest test_api.py
+```
 
 ## Batch Prediction
 For batch prediction, use the batch_prediction.py script. Ensure the FastAPI server is running and then execute the script:
 
+```sh
 python batch_prediction.py
+```
 
 ## Exploratory Data Analysis (EDA)
 To perform exploratory data analysis, use the eda.py script. This script helps visualize the data and analyze various aspects of the dataset.
