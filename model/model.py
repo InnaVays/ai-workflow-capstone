@@ -13,13 +13,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
-from cslib import fetch_ts, engineer_features
+from model.cslib import fetch_ts, engineer_features
 
 MODEL_DIR = "models"
 MODEL_VERSION = 0.1
 MODEL_VERSION_NOTE = "supervised learning model for time-series"
 
-from logger import update_predict_log, update_train_log
+from model.logger import update_predict_log, update_train_log
 
 def calculate_business_metrics(y_pred, y_actual):
     """

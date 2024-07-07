@@ -9,9 +9,9 @@ import json
 import traceback
 
 # Import functions from model.py and cslib.py
-from model import model_train, model_predict, model_load
-from cslib import fetch_ts, engineer_features
-from logger import update_train_log, update_predict_log
+from model.model import model_train, model_predict, model_load
+from model.cslib import fetch_ts, engineer_features
+from model.logger import update_train_log, update_predict_log
 
 app = FastAPI()
 
