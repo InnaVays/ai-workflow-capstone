@@ -157,6 +157,7 @@ def model_load(prefix='test', data_dir=None, training=True):
         
     return all_data, all_models
 
+
 def is_numeric(value):
     try:
         float(value)
@@ -173,7 +174,13 @@ def model_predict(country, year, month, day, all_models=None, test=False):
 
     ## load model if needed
     if not all_models:
+        print('Loading model!')
         all_data, all_models = model_load(training=False)
+
+    else:
+        # If all_models is provided, we need to load all_data separately
+        data_dir = os.path.join("data", "cs-train") if test else None
+        all_data, _ = model_load(prefix="test" if test else "test", data_dir=data_dir, training=False)
     
     ## input checks
     country_key = re.sub(r"\s+", "_", country.lower())

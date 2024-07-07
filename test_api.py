@@ -17,6 +17,18 @@ LOG_DIR = "logs"
 if not os.path.isdir(LOG_DIR):
     os.mkdir(LOG_DIR)
 
+# Ensure log files exist
+train_log_file = os.path.join(LOG_DIR, "train_log.json")
+predict_log_file = os.path.join(LOG_DIR, "predict_log.json")
+
+if not os.path.exists(train_log_file):
+    with open(train_log_file, 'w') as f:
+        json.dump([], f)
+
+if not os.path.exists(predict_log_file):
+    with open(predict_log_file, 'w') as f:
+        json.dump([], f)
+
 # API tests
 def test_train_endpoint():
     response = client.post("/train", json={"data_dir": "data/cs-train", "test": True})
@@ -55,15 +67,9 @@ def test_update_train_log():
     version = 0.1
     note = "test model"
 
-    # Ensure the log file exists
-    log_file = os.path.join(LOG_DIR, "train-test-log.json")
-    if not os.path.exists(log_file):
-        with open(log_file, 'w') as f:
-            json.dump([], f)
-
     update_train_log(tag, dates, metrics, runtime, version, note, test=True)
     
-    with open(log_file, "r") as file:
+    with open(train_log_file, "r") as file:
         logs = json.load(file)
         assert any(log["tag"] == tag for log in logs)
 
@@ -75,15 +81,9 @@ def test_update_predict_log():
     runtime = "00:00:10"
     version = 0.1
 
-    # Ensure the log file exists
-    log_file = os.path.join(LOG_DIR, "predict-test-log.json")
-    if not os.path.exists(log_file):
-        with open(log_file, 'w') as f:
-            json.dump([], f)
-
     update_predict_log(country, y_pred, y_proba, target_date, runtime, version, test=True)
 
-    with open(log_file, "r") as file:
+    with open(predict_log_file, "r") as file:
         logs = json.load(file)
         assert any(log["country"] == country for log in logs)
 
