@@ -36,7 +36,7 @@ To make a prediction, send a POST request to the /predict endpoint with the requ
 To run the unit tests, use the following command:
 
 ```sh
-pytest test_api.py
+pytest run_tests.py
 ```
 
 ## Batch Prediction

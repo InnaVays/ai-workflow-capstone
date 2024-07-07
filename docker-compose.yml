@@ -17,4 +17,4 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: ["pytest", "test_api.py"]
+    command: ["pytest", "run_tests.py"]
