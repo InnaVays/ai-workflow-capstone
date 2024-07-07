@@ -39,24 +39,13 @@ To run the unit tests, use the following command:
 python run_tests.py
 ```
 
-## Batch Prediction
-For batch prediction, use the batch_prediction.py script. Ensure the FastAPI server is running and then execute the script:
+### Batch Prediction and EDA
+Run batch_prediction_and_eda.ipynb in Jupyter Notebook and run all cells. 
+
+### Create report
 
 ```sh
-python batch_prediction.py
+jupyter nbconvert batch_prediction_and_eda.ipynb --to slides --no-input --post serve
 ```
 
-## Exploratory Data Analysis (EDA)
-To perform exploratory data analysis, use the eda.py script. This script helps visualize the data and analyze various aspects of the dataset.
-
-```sh
-python eda.py
-```
-
-## Post-Production Analysis
-The analysis.py script investigates the relationship between model performance and business metrics. 
-
-```sh
-python analysis.py
-```
 
