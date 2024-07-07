@@ -1,62 +1,19 @@
 [
     {
-        "timestamp": "2024-07-07 09:40:33",
+        "timestamp": "2024-07-07 12:24:54",
         "country": "all",
         "y_pred": [
-            181618.53100000002
-        ],
-        "y_proba": null,
-        "target_date": "2018-01-05",
-        "runtime": "000:00:12",
-        "model_version": 0.1,
-        "test": false
-    },
-    {
-        "timestamp": "2024-07-07 09:45:12",
-        "country": "all",
-        "y_pred": [
-            176959.75689999998
-        ],
-        "y_proba": null,
-        "target_date": "2018-01-05",
-        "runtime": "000:00:12",
-        "model_version": 0.1,
-        "test": false
-    },
-    {
-        "timestamp": "2024-07-07 10:23:29",
-        "country": "all",
-        "y_pred": [
-            183024.12483999995
+            190123.69615000003
         ],
         "y_proba": null,
         "target_date": "2018-01-05",
         "runtime": "000:00:13",
         "model_version": 0.1,
-        "test": true
-    },
-    {
-        "timestamp": "2024-07-07 10:26:44",
-        "country": "all",
-        "y_pred": [
-            172786.6934666667
-        ],
-        "y_proba": null,
-        "target_date": "2018-01-05",
-        "runtime": "000:00:12",
-        "model_version": 0.1,
-        "test": true
-    },
-    {
-        "timestamp": "2024-07-07 10:30:55",
-        "country": "all",
-        "y_pred": [
-            183847.06969999996
-        ],
-        "y_proba": null,
-        "target_date": "2018-01-05",
-        "runtime": "000:00:13",
-        "model_version": 0.1,
-        "test": true
+        "test": true,
+        "business_metric": {
+            "absolute_error": 189123.69615000003,
+            "mse": 35767772445.43754,
+            "r2_score": null
+        }
     }
 ]

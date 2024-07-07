@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", message="resource_tracker: .*")
+
 import os
 import re
 import time
@@ -17,6 +20,34 @@ MODEL_VERSION = 0.1
 MODEL_VERSION_NOTE = "supervised learning model for time-series"
 
 from logger import update_predict_log, update_train_log
+
+def calculate_business_metrics(y_pred, y_actual):
+    """
+    Calculate various business metrics between predicted and actual values.
+
+    :param y_pred: np.array or list, predicted values
+    :param y_actual: np.array or list, actual values
+    :return: dict, containing Absolute Error, Mean Squared Error, and R^2 score
+    """
+    y_pred = np.array(y_pred, dtype=np.float64)
+    y_actual = np.array(y_actual, dtype=np.float64)
+    
+    # Absolute Error
+    absolute_error = np.abs(y_pred - y_actual).sum()
+    
+    # Mean Squared Error (MSE)
+    mse = np.mean((y_pred - y_actual) ** 2)
+    
+    # R^2 Score
+    ss_total = np.sum((y_actual - np.mean(y_actual)) ** 2)
+    ss_res = np.sum((y_actual - y_pred) ** 2)
+    r2_score = 1 - (ss_res / ss_total) if ss_total != 0 else float('nan')
+    
+    return {
+        "absolute_error": absolute_error,
+        "mse": mse,
+        "r2_score": r2_score
+    }
 
 def _model_train(df, tag, test=False):
     """
@@ -84,8 +115,8 @@ def model_train(data_dir, test=False):
 
     if test:
         print("... test flag on")
-        print("...... subseting data")
-        print("...... subseting countries")
+        print("...... subsetting data")
+        print("...... subsetting countries")
         
     ## fetch time-series formatted data
     ts_data = fetch_ts(data_dir)
@@ -112,17 +143,26 @@ def model_load(prefix='test', data_dir=None, training=True):
 
     all_models = {}
     for model in models:
-        all_models[re.split("-", model)[1]] = joblib.load(os.path.join(".", "models", model))
+        model_name = re.split("-", model)[1]
+        all_models[model_name] = joblib.load(os.path.join(".", "models", model))
 
     ## load data
     ts_data = fetch_ts(data_dir)
     all_data = {}
     for country, df in ts_data.items():
+        country_key = re.sub(r"\s+", "_", country.lower())
         X, y, dates = engineer_features(df, training=training)
         dates = np.array([str(d) for d in dates])
-        all_data[country] = {"X": X, "y": y, "dates": dates}
+        all_data[country_key] = {"X": X, "y": y, "dates": dates}
         
     return all_data, all_models
+
+def is_numeric(value):
+    try:
+        float(value)
+    except ValueError:
+        return False
+    return True
 
 def model_predict(country, year, month, day, all_models=None, test=False):
     """
@@ -136,7 +176,8 @@ def model_predict(country, year, month, day, all_models=None, test=False):
         all_data, all_models = model_load(training=False)
     
     ## input checks
-    if country not in all_models.keys():
+    country_key = re.sub(r"\s+", "_", country.lower())
+    if country_key not in all_models.keys():
         raise Exception(f"ERROR (model_predict) - model for country '{country}' could not be found")
 
     for d in [year, month, day]:
@@ -144,8 +185,8 @@ def model_predict(country, year, month, day, all_models=None, test=False):
             raise Exception(f"ERROR (model_predict) - invalid year, month, or day: {d}")
     
     ## load data
-    model = all_models[country]
-    data = all_data[country]
+    model = all_models[country_key]
+    data = all_data[country_key]
 
     ## check date
     target_date = "{}-{}-{}".format(year, str(month).zfill(2), str(day).zfill(2))
@@ -167,18 +208,28 @@ def model_predict(country, year, month, day, all_models=None, test=False):
         if model.probability:
             y_proba = model.predict_proba(query)
 
+    # Assume we have actual values for business metric calculation
+    y_actual = np.array([1000])  # Replace with actual data if available
+    business_metrics = calculate_business_metrics(y_pred, y_actual)
+
     m, s = divmod(time.time() - time_start, 60)
     h, m = divmod(m, 60)
     runtime = "%03d:%02d:%02d" % (h, m, s)
 
+    ## Handle NaN and Infinity in business metrics
+    for key, value in business_metrics.items():
+        if not is_numeric(value) or np.isnan(value) or np.isinf(value):
+            business_metrics[key] = None
+
     ## update predict log
     update_predict_log(country, y_pred, y_proba, target_date,
-                       runtime, MODEL_VERSION, test=test)
+                       runtime, MODEL_VERSION, test=test, business_metric=business_metrics)
 
     # Ensure y_pred and y_proba are JSON serializable
     return {
         'y_pred': y_pred.tolist() if isinstance(y_pred, np.ndarray) else y_pred,
-        'y_proba': y_proba.tolist() if isinstance(y_proba, np.ndarray) else y_proba
+        'y_proba': y_proba.tolist() if isinstance(y_proba, np.ndarray) else y_proba,
+        'business_metrics': business_metrics
     }
 
 if __name__ == "__main__":

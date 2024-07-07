@@ -38,7 +38,15 @@ def update_train_log(tag, dates, metrics, runtime, model_version, model_version_
     _write_log(log_data, TRAIN_LOG_FILE)
     print(f"Training log updated for {tag}")
 
-def update_predict_log(country, y_pred, y_proba, target_date, runtime, model_version, test=False):
+def update_predict_log(country, y_pred, y_proba, target_date, runtime, model_version, test=False, business_metric=None):
+    # Ensure business_metric is a dictionary
+    if not isinstance(business_metric, dict):
+        business_metric = {
+            "absolute_error": None,
+            "mse": None,
+            "r2_score": None
+        }
+    
     log_data = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "country": country,
@@ -47,7 +55,8 @@ def update_predict_log(country, y_pred, y_proba, target_date, runtime, model_ver
         "target_date": target_date,
         "runtime": runtime,
         "model_version": model_version,
-        "test": test
+        "test": test,
+        "business_metric": business_metric
     }
     _write_log(log_data, PREDICT_LOG_FILE)
     print(f"Prediction log updated for {country} on {target_date}")
