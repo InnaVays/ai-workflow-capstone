@@ -1,6 +1,7 @@
 import os
 import json
 from datetime import datetime
+import numpy as np 
 
 LOG_DIR = "logs"
 TRAIN_LOG_FILE = "train_log.json"
