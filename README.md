@@ -49,6 +49,14 @@ python batch_prediction.py
 ## Exploratory Data Analysis (EDA)
 To perform exploratory data analysis, use the eda.py script. This script helps visualize the data and analyze various aspects of the dataset.
 
+```sh
+pytest eda.py
+```
+
 ## Post-Production Analysis
 The analysis.py script investigates the relationship between model performance and business metrics. 
+
+```sh
+pytest analysis.py
+```
 
