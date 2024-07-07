@@ -22,5 +22,41 @@
         "runtime": "000:00:12",
         "model_version": 0.1,
         "test": false
+    },
+    {
+        "timestamp": "2024-07-07 10:23:29",
+        "country": "all",
+        "y_pred": [
+            183024.12483999995
+        ],
+        "y_proba": null,
+        "target_date": "2018-01-05",
+        "runtime": "000:00:13",
+        "model_version": 0.1,
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:26:44",
+        "country": "all",
+        "y_pred": [
+            172786.6934666667
+        ],
+        "y_proba": null,
+        "target_date": "2018-01-05",
+        "runtime": "000:00:12",
+        "model_version": 0.1,
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:30:55",
+        "country": "all",
+        "y_pred": [
+            183847.06969999996
+        ],
+        "y_proba": null,
+        "target_date": "2018-01-05",
+        "runtime": "000:00:13",
+        "model_version": 0.1,
+        "test": true
     }
 ]

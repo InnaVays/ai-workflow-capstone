@@ -124,38 +124,39 @@ def model_load(prefix='test', data_dir=None, training=True):
         
     return all_data, all_models
 
-def model_predict(country,year,month,day,all_models=None,test=False):
+def model_predict(country, year, month, day, all_models=None, test=False):
+    """
+    Example function to predict from model
+    """
     ## start timer for runtime
     time_start = time.time()
 
     ## load model if needed
     if not all_models:
-        all_data,all_models = model_load(training=False)
+        all_data, all_models = model_load(training=False)
     
     ## input checks
     if country not in all_models.keys():
-        raise Exception("ERROR (model_predict) - model for country '{}' could not be found".format(country))
+        raise Exception(f"ERROR (model_predict) - model for country '{country}' could not be found")
 
-    for d in [year,month,day]:
-        if re.search("\D",d):
-            raise Exception("ERROR (model_predict) - invalid year, month or day")
+    for d in [year, month, day]:
+        if re.search("\D", d):
+            raise Exception(f"ERROR (model_predict) - invalid year, month, or day: {d}")
     
     ## load data
     model = all_models[country]
     data = all_data[country]
 
     ## check date
-    target_date = "{}-{}-{}".format(year,str(month).zfill(2),str(day).zfill(2))
-    print(target_date)
+    target_date = "{}-{}-{}".format(year, str(month).zfill(2), str(day).zfill(2))
+    print(f"Target date: {target_date}")
 
     if target_date not in data['dates']:
-        raise Exception("ERROR (model_predict) - date {} not in range {}-{}".format(target_date,
-                                                                                    data['dates'][0],
-                                                                                    data['dates'][-1]))
+        raise Exception(f"ERROR (model_predict) - date {target_date} not in range {data['dates'][0]}-{data['dates'][-1]}")
     date_indx = np.where(data['dates'] == target_date)[0][0]
     query = data['X'].iloc[[date_indx]]
     
-    ## sainty check
+    ## sanity check
     if data['dates'].shape[0] != data['X'].shape[0]:
         raise Exception("ERROR (model_predict) - dimensions mismatch")
 
@@ -163,19 +164,22 @@ def model_predict(country,year,month,day,all_models=None,test=False):
     y_pred = model.predict(query)
     y_proba = None
     if 'predict_proba' in dir(model) and 'probability' in dir(model):
-        if model.probability == True:
+        if model.probability:
             y_proba = model.predict_proba(query)
 
-
-    m, s = divmod(time.time()-time_start, 60)
+    m, s = divmod(time.time() - time_start, 60)
     h, m = divmod(m, 60)
-    runtime = "%03d:%02d:%02d"%(h, m, s)
+    runtime = "%03d:%02d:%02d" % (h, m, s)
 
     ## update predict log
-    update_predict_log(country,y_pred,y_proba,target_date,
+    update_predict_log(country, y_pred, y_proba, target_date,
                        runtime, MODEL_VERSION, test=test)
-    
-    return({'y_pred':y_pred,'y_proba':y_proba})
+
+    # Ensure y_pred and y_proba are JSON serializable
+    return {
+        'y_pred': y_pred.tolist() if isinstance(y_pred, np.ndarray) else y_pred,
+        'y_proba': y_proba.tolist() if isinstance(y_proba, np.ndarray) else y_proba
+    }
 
 if __name__ == "__main__":
 

@@ -1,8 +1,12 @@
+import warnings
+warnings.filterwarnings("ignore", message="resource_tracker: .*")
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import os
 import json
+import traceback
 
 # Import functions from model.py and cslib.py
 from model import model_train, model_predict, model_load
@@ -48,7 +52,9 @@ def predict_model(request: PredictRequest):
         result = model_predict(request.country, request.year, request.month, request.day, test=request.test)
         return result
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        error_message = f"Error in /predict endpoint: {str(e)}\n{traceback.format_exc()}"
+        print(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
 
 @app.post("/logfile")
 def get_logfile(request: LogfileRequest):

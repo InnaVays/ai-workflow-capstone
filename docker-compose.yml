@@ -11,7 +11,7 @@ services:
       - PYTHONUNBUFFERED=1
 
   test:
-    image: python:3.10-slim
+    build: .
     depends_on:
       - app
     volumes:

@@ -208,5 +208,95 @@
         "model_version": 0.1,
         "model_version_note": "supervised learning model for time-series",
         "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:23:12",
+        "tag": "all",
+        "dates": [
+            "2017-11-29",
+            "2019-05-30"
+        ],
+        "metrics": {
+            "rmse": 29089
+        },
+        "runtime": "000:00:05",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:23:16",
+        "tag": "united_kingdom",
+        "dates": [
+            "2017-11-30",
+            "2019-05-17"
+        ],
+        "metrics": {
+            "rmse": 40351
+        },
+        "runtime": "000:00:03",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:26:27",
+        "tag": "all",
+        "dates": [
+            "2017-11-30",
+            "2019-05-24"
+        ],
+        "metrics": {
+            "rmse": 31386
+        },
+        "runtime": "000:00:05",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:26:31",
+        "tag": "united_kingdom",
+        "dates": [
+            "2017-11-29",
+            "2019-05-28"
+        ],
+        "metrics": {
+            "rmse": 34202
+        },
+        "runtime": "000:00:03",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:30:38",
+        "tag": "all",
+        "dates": [
+            "2017-12-01",
+            "2019-05-30"
+        ],
+        "metrics": {
+            "rmse": 30924
+        },
+        "runtime": "000:00:05",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 10:30:41",
+        "tag": "united_kingdom",
+        "dates": [
+            "2017-12-14",
+            "2019-05-27"
+        ],
+        "metrics": {
+            "rmse": 49715
+        },
+        "runtime": "000:00:03",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
     }
 ]
