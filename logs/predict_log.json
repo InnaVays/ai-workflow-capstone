@@ -10,5 +10,17 @@
         "runtime": "000:00:12",
         "model_version": 0.1,
         "test": false
+    },
+    {
+        "timestamp": "2024-07-07 09:45:12",
+        "country": "all",
+        "y_pred": [
+            176959.75689999998
+        ],
+        "y_proba": null,
+        "target_date": "2018-01-05",
+        "runtime": "000:00:12",
+        "model_version": 0.1,
+        "test": false
     }
 ]

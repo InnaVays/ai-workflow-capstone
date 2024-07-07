@@ -125,10 +125,6 @@ def model_load(prefix='test', data_dir=None, training=True):
     return all_data, all_models
 
 def model_predict(country,year,month,day,all_models=None,test=False):
-    """
-    example funtion to predict from model
-    """
-
     ## start timer for runtime
     time_start = time.time()
 

@@ -178,5 +178,35 @@
         "model_version": 0.1,
         "model_version_note": "supervised learning model for time-series",
         "test": true
+    },
+    {
+        "timestamp": "2024-07-07 09:44:42",
+        "tag": "all",
+        "dates": [
+            "2017-12-04",
+            "2019-05-28"
+        ],
+        "metrics": {
+            "rmse": 23291
+        },
+        "runtime": "000:00:05",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
+    },
+    {
+        "timestamp": "2024-07-07 09:44:46",
+        "tag": "united_kingdom",
+        "dates": [
+            "2017-12-02",
+            "2019-05-31"
+        ],
+        "metrics": {
+            "rmse": 34778
+        },
+        "runtime": "000:00:03",
+        "model_version": 0.1,
+        "model_version_note": "supervised learning model for time-series",
+        "test": true
     }
 ]
