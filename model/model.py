@@ -1,115 +1,91 @@
 import warnings
 warnings.filterwarnings("ignore", message="resource_tracker: .*")
 
-import os
-import re
-import time
-import joblib
+import time,os,re,csv,sys,uuid,joblib
+from datetime import date
+from collections import defaultdict
 import numpy as np
 import pandas as pd
-from collections import defaultdict
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn import svm
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
-from model.cslib import fetch_ts, engineer_features
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.pipeline import Pipeline
 
+import sys
+sys.path.append("model")
+from logger import update_predict_log, update_train_log
+from cslib import fetch_ts, engineer_features
+
+## model specific variables (iterate the version and note with each change)
 MODEL_DIR = "models"
 MODEL_VERSION = 0.1
 MODEL_VERSION_NOTE = "supervised learning model for time-series"
 
-from model.logger import update_predict_log, update_train_log
+def _model_train(df,tag,test=False):
 
-def calculate_business_metrics(y_pred, y_actual):
-    """
-    Calculate various business metrics between predicted and actual values.
-
-    :param y_pred: np.array or list, predicted values
-    :param y_actual: np.array or list, actual values
-    :return: dict, containing Absolute Error, Mean Squared Error, and R^2 score
-    """
-    y_pred = np.array(y_pred, dtype=np.float64)
-    y_actual = np.array(y_actual, dtype=np.float64)
-    
-    # Absolute Error
-    absolute_error = np.abs(y_pred - y_actual).sum()
-    
-    # Mean Squared Error (MSE)
-    mse = np.mean((y_pred - y_actual) ** 2)
-    
-    # R^2 Score
-    ss_total = np.sum((y_actual - np.mean(y_actual)) ** 2)
-    ss_res = np.sum((y_actual - y_pred) ** 2)
-    r2_score = 1 - (ss_res / ss_total) if ss_total != 0 else float('nan')
-    
-    return {
-        "absolute_error": absolute_error,
-        "mse": mse,
-        "r2_score": r2_score
-    }
-
-def _model_train(df, tag, test=False):
-    """
-    Example function to train model
-    
-    The 'test' flag when set to 'True':
-        (1) subsets the data and serializes a test version
-        (2) specifies that the use of the 'test' log file 
-    """
     ## start timer for runtime
     time_start = time.time()
     
-    X, y, dates = engineer_features(df)
+    X,y,dates = engineer_features(df)
 
     if test:
         n_samples = int(np.round(0.3 * X.shape[0]))
-        subset_indices = np.random.choice(np.arange(X.shape[0]), n_samples, replace=False).astype(int)
-        mask = np.in1d(np.arange(y.size), subset_indices)
-        y = y[mask]
-        X = X[mask]
-        dates = dates[mask]
+        subset_indices = np.random.choice(np.arange(X.shape[0]),n_samples,
+                                          replace=False).astype(int)
+        mask = np.in1d(np.arange(y.size),subset_indices)
+        y=y[mask]
+        X=X[mask]
+        dates=dates[mask]
         
     ## Perform a train-test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, shuffle=True, random_state=42)
-    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25,
+                                                        shuffle=True, random_state=42)
     ## train a random forest model
     param_grid_rf = {
-        'rf__criterion': ['squared_error', 'absolute_error'],
-        'rf__n_estimators': [10, 15, 20, 25]
-    }
+    'rf__criterion': ['squared_error', 'absolute_error'],
+    'rf__n_estimators': [10, 15, 20, 25]
+}
 
-    pipe_rf = Pipeline(steps=[('scaler', StandardScaler()), ('rf', RandomForestRegressor())])
+
+    pipe_rf = Pipeline(steps=[('scaler', StandardScaler()),
+                              ('rf', RandomForestRegressor())])
     
     grid = GridSearchCV(pipe_rf, param_grid=param_grid_rf, cv=5, n_jobs=-1)
     grid.fit(X_train, y_train)
     y_pred = grid.predict(X_test)
-    eval_rmse = round(np.sqrt(mean_squared_error(y_test, y_pred)))
+    eval_rmse =  round(np.sqrt(mean_squared_error(y_test,y_pred)))
     
     ## retrain using all data
     grid.fit(X, y)
-    model_name = re.sub("\.", "_", str(MODEL_VERSION))
+    model_name = re.sub("\.","_",str(MODEL_VERSION))
     if test:
-        saved_model = os.path.join(MODEL_DIR, "test-{}-{}.joblib".format(tag, model_name))
+        saved_model = os.path.join(MODEL_DIR,
+                                   "test-{}-{}.joblib".format(tag,model_name))
         print("... saving test version of model: {}".format(saved_model))
     else:
-        saved_model = os.path.join(MODEL_DIR, "test-{}-{}.joblib".format(tag, model_name))
+        saved_model = os.path.join(MODEL_DIR,
+                                   "sl-{}-{}.joblib".format(tag,model_name))
         print("... saving model: {}".format(saved_model))
         
-    joblib.dump(grid, saved_model)
+    joblib.dump(grid,saved_model)
 
-    m, s = divmod(time.time() - time_start, 60)
+    m, s = divmod(time.time()-time_start, 60)
     h, m = divmod(m, 60)
-    runtime = "%03d:%02d:%02d" % (h, m, s)
+    runtime = "%03d:%02d:%02d"%(h, m, s)
 
     ## update log
-    update_train_log(tag, (str(dates[0]), str(dates[-1])), {'rmse': eval_rmse}, runtime,
-                     MODEL_VERSION, MODEL_VERSION_NOTE, test=test)
-
-def model_train(data_dir, test=False):
+    update_train_log(tag,(str(dates[0]),str(dates[-1])),{'rmse':eval_rmse},runtime,
+                     MODEL_VERSION, MODEL_VERSION_NOTE,test=True)
+  
+def model_train(data_dir,test=False):
     """
-    Function to train model given a data directory
+    function to train model given a df
+    
+    'mode' -  can be used to subset data essentially simulating a train
     """
+    
     if not os.path.isdir(MODEL_DIR):
         os.mkdir(MODEL_DIR)
 
@@ -121,66 +97,82 @@ def model_train(data_dir, test=False):
     ## fetch time-series formatted data
     ts_data = fetch_ts(data_dir)
 
-    ## train a different model for each data set
-    for country, df in ts_data.items():
-        if test and country not in ['all', 'united_kingdom']:
+    ## train a different model for each data sets
+    for country,df in ts_data.items():
+        
+        if test and country not in ['all','united_kingdom']:
             continue
-        _model_train(df, country, test=test)
-
-def model_load(prefix='test', data_dir=None, training=True):
+        
+        _model_train(df,country,test=test)
+    
+def model_load(prefix='sl',data_dir=None,training=True):
     """
-    Example function to load model
+    example funtion to load model
     
     The prefix allows the loading of different models
     """
+
     if not data_dir:
-        data_dir = os.path.join("data", "cs-train")
+        data_dir = os.path.join("data","cs-train")
     
-    models = [f for f in os.listdir(os.path.join(".", "models")) if re.search(prefix, f)]
+    models = [f for f in os.listdir(os.path.join("models")) if re.search(prefix,f)]
 
     if len(models) == 0:
-        raise Exception("Models with prefix '{}' cannot be found. Did you train?".format(prefix))
+        raise Exception("Models with prefix '{}' cannot be found did you train?".format(prefix))
 
     all_models = {}
     for model in models:
-        model_name = re.split("-", model)[1]
-        all_models[model_name] = joblib.load(os.path.join(".", "models", model))
+        all_models[re.split("-",model)[1]] = joblib.load(os.path.join("models",model))
 
     ## load data
     ts_data = fetch_ts(data_dir)
     all_data = {}
     for country, df in ts_data.items():
-        country_key = re.sub(r"\s+", "_", country.lower())
-        X, y, dates = engineer_features(df, training=training)
+        df = clean_data(df)
+        X,y,dates = engineer_features(df,training=training)
         dates = np.array([str(d) for d in dates])
-        all_data[country_key] = {"X": X, "y": y, "dates": dates}
+        all_data[country] = {"X":X,"y":y,"dates": dates}
         
-    return all_data, all_models
+    return(all_data, all_models)
+    
+def clean_data(df):
+    revenue = df['revenue']
+    
+    if df.empty:
+        return(df)
+    
+    # without negative revenue
+    mask = revenue < 0
+    df.loc[mask, 'revenue'] = np.nan  # Changed from df.at to df.loc
 
+    # without quantile range outliers
+    mask = revenue.between(revenue.quantile(.0), revenue.quantile(0.85)) 
+    df.loc[~mask, 'revenue'] = np.nan  # Changed from df.at to df.loc
 
-def is_numeric(value):
-    try:
-        float(value)
-    except ValueError:
-        return False
-    return True
+    mask = revenue.notna()
+    median = np.median(df[mask]['revenue'])
+
+    #df['revenue'].fillna(median, inplace = True)
+    df.fillna({'revenue': median}, inplace=True)
+    
+    return(df)
 
 def model_predict(country, year, month, day, all_models=None, test=False):
     """
-    Example function to predict from model
+    example function to predict from model
     """
+
     ## start timer for runtime
     time_start = time.time()
 
     ## load model if needed
     if not all_models:
-        print('Loading model!')
-        all_data, all_models = model_load(training=False)
-
+        data_dir = os.path.join("data", "cs-train") if test else None
+        all_data, all_models = model_load(prefix="test" if test else "sl", data_dir=data_dir, training=False)
     else:
         # If all_models is provided, we need to load all_data separately
         data_dir = os.path.join("data", "cs-train") if test else None
-        all_data, _ = model_load(prefix="test" if test else "test", data_dir=data_dir, training=False)
+        all_data, _ = model_load(prefix="test" if test else "sl", data_dir=data_dir, training=False)
     
     ## input checks
     country_key = re.sub(r"\s+", "_", country.lower())
@@ -196,9 +188,7 @@ def model_predict(country, year, month, day, all_models=None, test=False):
     data = all_data[country_key]
 
     ## check date
-    target_date = "{}-{}-{}".format(year, str(month).zfill(2), str(day).zfill(2))
-    print(f"Target date: {target_date}")
-
+    target_date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     if target_date not in data['dates']:
         raise Exception(f"ERROR (model_predict) - date {target_date} not in range {data['dates'][0]}-{data['dates'][-1]}")
     date_indx = np.where(data['dates'] == target_date)[0][0]
@@ -215,50 +205,35 @@ def model_predict(country, year, month, day, all_models=None, test=False):
         if model.probability:
             y_proba = model.predict_proba(query)
 
-    # Assume we have actual values for business metric calculation
-    y_actual = np.array([1000])  # Replace with actual data if available
-    business_metrics = calculate_business_metrics(y_pred, y_actual)
-
     m, s = divmod(time.time() - time_start, 60)
     h, m = divmod(m, 60)
     runtime = "%03d:%02d:%02d" % (h, m, s)
 
-    ## Handle NaN and Infinity in business metrics
-    for key, value in business_metrics.items():
-        if not is_numeric(value) or np.isnan(value) or np.isinf(value):
-            business_metrics[key] = None
-
     ## update predict log
-    update_predict_log(country, y_pred, y_proba, target_date,
-                       runtime, MODEL_VERSION, test=test, business_metric=business_metrics)
-
-    # Ensure y_pred and y_proba are JSON serializable
-    return {
-        'y_pred': y_pred.tolist() if isinstance(y_pred, np.ndarray) else y_pred,
-        'y_proba': y_proba.tolist() if isinstance(y_proba, np.ndarray) else y_proba,
-        'business_metrics': business_metrics
-    }
+    update_predict_log(country, y_pred, y_proba, target_date, runtime, MODEL_VERSION, test=test)
+    
+    return {'y_pred': y_pred.tolist() if isinstance(y_pred, np.ndarray) else y_pred,
+            'y_proba': y_proba.tolist() if isinstance(y_proba, np.ndarray) else y_proba}
 
 if __name__ == "__main__":
-
     """
     basic test procedure for model.py
     """
 
     ## train the model
     print("TRAINING MODELS")
-    data_dir = os.path.join("data","cs-train")
-    model_train(data_dir,test=True)
+    data_dir = os.path.join("data", "cs-train")
+    model_train(data_dir, test=True)
 
     ## load the model
     print("LOADING MODELS")
     all_data, all_models = model_load(prefix="test")
-    print("... models loaded: ",",".join(all_models.keys()))
+    print("... models loaded: ", ",".join(all_models.keys()))
 
     ## test predict
-    country='all'
-    year='2018'
-    month='01'
-    day='05'
-    result = model_predict(country, year, month, day)
+    country = 'all'
+    year = '2018'
+    month = '01'
+    day = '05'
+    result = model_predict(country, year, month, day, all_models=all_models, test=True)
     print(result)

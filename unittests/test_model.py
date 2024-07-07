@@ -1,6 +1,6 @@
 import pytest
 import os
-from model import model_train, model_load, model_predict, MODEL_DIR
+from model.model import model_train, model_load, model_predict, MODEL_DIR
 
 def test_model_train():
     data_dir = "data/cs-train"

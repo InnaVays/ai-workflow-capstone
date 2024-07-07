@@ -11,6 +11,7 @@ def test_train_endpoint():
 def test_predict_endpoint():
     response = client.post("/predict", json={"country": "all", "year": "2018", "month": "01", "day": "05", "test": True})
     assert response.status_code == 200
+    assert "y_pred" in response.json()
 
 if __name__ == "__main__":
     pytest.main()

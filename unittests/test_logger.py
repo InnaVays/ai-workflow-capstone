@@ -1,7 +1,7 @@
 import pytest
 import os
 import json
-from logger import update_train_log, update_predict_log
+from model.logger import update_train_log, update_predict_log
 
 LOG_DIR = "logs"
 

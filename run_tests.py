@@ -1,6 +1,12 @@
-import unittest
+import pytest
 import sys
-sys.path.append("model")
 
-from unittest import *
-unittest.main()
+def main():
+    # Run all the tests in the unittests directory
+    result = pytest.main(['unittests'])
+
+    # Exit with the appropriate status code
+    sys.exit(result)
+
+if __name__ == "__main__":
+    main()
