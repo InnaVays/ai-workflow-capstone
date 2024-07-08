@@ -1,11 +1,7 @@
 # IBM AI Enterprise Workflow Capstone
 That is a fork of the IBM AI Enterprise Workflow Capstone project. 
 
-# FastAPI ML Model API
-
 This repository contains a FastAPI-based API for training and predicting machine learning models for time-series data. The project includes Docker support, unit tests, and post-production analysis scripts.
-
-## Getting Started
 
 ### Prerequisites
 
