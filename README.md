@@ -32,7 +32,13 @@ To train the model, send a POST request to the /train endpoint with the appropri
 ### Make a Prediction
 To make a prediction, send a POST request to the /predict endpoint with the required parameters.
 
-## Batch Prediction and EDA
+## Data injestion 
+
+```sh
+python data_ingestion.py
+```
+
+## Batch prediction and EDA
 Run batch_prediction_and_eda.ipynb in Jupyter Notebook and run all cells. 
 
 ## Create report
